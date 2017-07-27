@@ -19,6 +19,7 @@ var MogicSocket = cc.Class({
         this._isConnected = false;
         this._reqeustHandle = {};
         this._reqHandleId = 1;
+        this._session_id = false;
         this._sock = new WebSocket("ws://60.191.205.121:3736");
         this.protocal = new Protocal();
         this.protocal.on(Protocal.MEvent.ON_PACKAGE, function(pack){
@@ -54,6 +55,7 @@ var MogicSocket = cc.Class({
     request:function(route, params, cb){
         var handleId = this._reqHandleId++;
         this._reqeustHandle[handleId] = cb;
+        if (this._session_id) this.params['session_id'] = this._session_id;
         var data = [route, params];
         var message = Protocal.Message.getMessage(Protocal.Message.TYPE_REQUEST, data, handleId);//response中回传handleId实现异步回调
         var pack = Protocal.MPackage.getPackage(Protocal.MPackage.TYPE_DATA, message);
@@ -78,7 +80,9 @@ var MogicSocket = cc.Class({
         this.initHeartBeatTicker();
         var self = this;
         this.emit('Connected');
-
+        this.on('session_start', function(params){
+            self._session_id = params.session_id;
+        })
         // this._sock.send("xxxxxasdfasdfsdfxx")
         // setTimeout(function(){
         //     var st = new Date().getTime();
@@ -114,6 +118,7 @@ var MogicSocket = cc.Class({
             case Protocal.Message.TYPE_RESPONSE:
                 var handle = this._reqeustHandle[addition];
                 delete this._reqeustHandle[addition];
+                if (data[1]['session_id']) this._session_id = data[1]['session_id'];
                 handle(data[0], data[1]);
             break;
             case Protocal.Message.TYPE_PUSH:
@@ -121,7 +126,8 @@ var MogicSocket = cc.Class({
                 this.emit(_eventname, _params);
             break;
         }
-    }
+    },
+
     // _onMessage:function(err, rep){
     //     this._lastHeartbeatTime = this.getNowTime();
     //     cc.log("onmessage", err, rep)
