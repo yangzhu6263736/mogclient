@@ -2,9 +2,9 @@
 mogic wetsocket client for cocos creator
 ========
 调用方式
+
     cc.Class({
         extends: cc.Component,
-
         properties: {
             label: {
                 default: null,
