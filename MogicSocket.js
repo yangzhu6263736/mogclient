@@ -55,7 +55,7 @@ var MogicSocket = cc.Class({
     request:function(route, params, cb){
         var handleId = this._reqHandleId++;
         this._reqeustHandle[handleId] = cb;
-        if (this._session_id) this.params['session_id'] = this._session_id;
+        if (this._session_id) params['session_id'] = this._session_id;
         var data = [route, params];
         var message = Protocal.Message.getMessage(Protocal.Message.TYPE_REQUEST, data, handleId);//response中回传handleId实现异步回调
         var pack = Protocal.MPackage.getPackage(Protocal.MPackage.TYPE_DATA, message);
